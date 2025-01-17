@@ -1,0 +1,19 @@
+{
+  "name": "tilt-maze-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Tilt Maze mobile appication game",
+  "main": "app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rishiraj09/tilt-maze.git"
+  },
+  "author": "Salam Rishiraj Singh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rishiraj09/tilt-maze/issues"
+  },
+  "homepage": "https://github.com/rishiraj09/tilt-maze#readme"
+}
