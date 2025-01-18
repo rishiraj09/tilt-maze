@@ -3,7 +3,8 @@ import { body } from "express-validator";
 
 // controllers
 
-import {signup, signin} from "../controllers/authController";
+import {signup, signin, fetchUserSession} from "../controllers/authController";
+
 
 const router = express.Router();
 
@@ -26,5 +27,8 @@ router.route("/signin")
       .isLength({ min: 1 })
       .withMessage("Enter valid password"),
   ], signin)
+
+router.route("/session")
+  .get(fetchUserSession)
 
 export default router;

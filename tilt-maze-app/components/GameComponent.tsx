@@ -31,7 +31,7 @@ interface Wall {
 }
 
 const GameComponent = () => {
-  const { setIsStarted, endGame, setCollisionCount } =
+  const { setIsStarted, endGame, exitGame, game, setGame } =
     useContext(GameContext);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [velocity, setVelocity] = useState<Velocity>({ vx: 0, vy: 0 });
@@ -221,7 +221,10 @@ const GameComponent = () => {
   }, [velocity, containerDimensions]);
 
   useEffect(() => {
-    setCollisionCount(collideCount);
+    setGame({
+      ...game,
+      collision: collideCount
+    })
   }, [collideCount]);
 
   useEffect(() => {
@@ -253,7 +256,7 @@ const GameComponent = () => {
       ){
         setHasReachedGoal(true);
         stopTimer();
-        endGame("12345", formatTime(timer));
+        endGame(formatTime(timer), timer);
       }
 
     }
@@ -358,13 +361,13 @@ const GameComponent = () => {
       <TouchableOpacity
         style={styles.exitBtn}
         onPress={() => {
-          endGame("rishiraj");
+          exitGame(formatTime(timer), timer);
           setIsStarted(false);
         }}
       >
         <Text style={styles.exitText}>
           <IconEntypo name="chevron-thin-left" size={17} color="black" />
-          End Game
+          Exit Game
         </Text>
       </TouchableOpacity>
       <View style={styles.gameNameHolder}>

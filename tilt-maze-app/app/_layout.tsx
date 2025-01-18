@@ -1,10 +1,13 @@
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, Redirect, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import "react-native-reanimated";
+
+
+// context
 import { GameContextProvider } from "@/contexts/GameContext";
-import { AuthContextProvider } from "@/contexts/AuthContext";
+import { AuthContext, AuthContextProvider} from "@/contexts/AuthContext";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -41,16 +44,33 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
+const StackLayout = () =>{
+  const {user} = useContext(AuthContext);
+  const segments = useSegments();
+  
+   // Check if the current route is in the (tabs) group
+   const isInTabsGroup = segments[0] === '(tabs)';
+  
+   // If user is not authenticated and trying to access protected routes
+   // Redirect them to auth page
+   if (!user && isInTabsGroup) {
+     return <Redirect href="/sign-in" />;
+   }
+
+  return(
+    <Stack>
+    <Stack.Screen name="index" options={{ headerShown: false, gestureEnabled: false }} />
+    <Stack.Screen name="(auth)" options={{ headerShown: false, gestureEnabled: false }} />
+    <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false }} />
+  </Stack>
+  )
+}
 
 function RootLayoutNav() {
   return (
     <AuthContextProvider>
       <GameContextProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <StackLayout/>
       </GameContextProvider>
     </AuthContextProvider>
   );

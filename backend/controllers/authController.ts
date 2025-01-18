@@ -2,12 +2,17 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { validationResult } from "express-validator";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 dotenv.config();
 
 // models
 import User from "../model/user";
+
+interface DecodedToken {
+  id: string;
+  email: string;
+}
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -125,3 +130,57 @@ export const signin = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const fetchUserSession = async (req: Request, res: Response) =>{
+  const token = req.query.token;
+  try {
+    if(!token || token === "none" || token === null){
+      return res.status(401).json({
+        success:false,
+        error: "Invalid token payload",
+        message: "Logging out"
+      })
+    }
+    const decoded = jwt.decode(token as string) as JwtPayload | null;
+    if (!decoded || typeof decoded !== "object" || !("id" in decoded)) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid token payload",
+        message: "Logging out",
+      });
+    }
+    const validToken = jwt.verify(token as string, process.env.JWT_SECRET as string);
+    if(!validToken){
+      return res.status(401).json({
+        success: false,
+        error: "Invalid token payload",
+        message: "Logging out",
+      });
+    }
+    const userId = (decoded as DecodedToken).id;
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(401).json({
+        success:false,
+        error: "Invalid token payload",
+        message: "Logging out",
+      })
+    }
+    let userinfo = {
+      id: user.id.toString().trim(),
+      name: user.name,
+      email: user.email,
+      token: token
+    }
+    return res.status(200).json({
+      success:true,
+      user: userinfo
+    })
+  } catch (error) {
+    console.error("Could not fetch user session",error);
+    return res.status(500).json({
+      success: false,
+      message: "Could not fetch user session"
+    })
+  }
+}

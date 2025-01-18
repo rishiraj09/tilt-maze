@@ -10,6 +10,7 @@ import connectToDatabase from "./config/coreDb";
 
 // routes import
 import auth from "./routes/auth";
+import game from "./routes/game";
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // router middleware
 app.use("/api/v1/auth", auth);
+app.use("/api/v1/game", game);
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001; // Explicitly parse the port to a number
 

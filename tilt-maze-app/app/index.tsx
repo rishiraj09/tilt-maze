@@ -1,48 +1,56 @@
-import React, {useContext, useEffect} from "react";
-import { SafeAreaView, StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import React, { useContext, useEffect } from "react";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 
 // context
 import { AuthContext } from "@/contexts/AuthContext";
 
-
 // images
-import {images} from "../constants/images";
+import { images } from "../constants/images";
 
 const Index = () => {
-  const {user} = useContext(AuthContext);
-  useEffect(() =>{
-    console.log(user)
-  },[user])
+  const { user, loading } = useContext(AuthContext);
+  useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        router.replace("/home");
+      },1000);
+    }
+  }, [user]);
   return (
     <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: "#0d1023",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
       }}
     >
       <StatusBar style="light" />
       <View style={styles.container}>
         <View style={styles.titleHolder}>
           <Text style={styles.textRed}>Tilt</Text>
-          <Text style={styles.textBlack}>Maze</Text>
+          <Text style={styles.textWhite}>Maze</Text>
         </View>
-        <Image
-          source={images.maze}
-          resizeMode="contain"
-          style={styles.image}
-        />
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            router.replace("/sign-in");
-          }}
-        >
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
+        <Image source={images.maze} resizeMode="contain" style={styles.image} />
+        {!loading && user === null && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              router.replace("/sign-in");
+            }}
+          >
+            <Text style={styles.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -52,31 +60,31 @@ const styles = StyleSheet.create({
   container: {
     width: "90%",
     height: 400,
-    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 6
+    borderRadius: 6,
   },
-  titleHolder:{
+  titleHolder: {
     width: "100%",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    marginBottom: 20
+    marginBottom: 20,
   },
-  textRed:{
+  textRed: {
     fontSize: 40,
     fontWeight: "bold",
     fontStyle: "italic",
-    color:"red"
+    color: "red",
   },
-  textBlack:{
+  textWhite: {
     fontSize: 40,
     fontWeight: "bold",
+    color: "white"
   },
-  image:{
+  image: {
     width: 120,
     height: 120,
   },
@@ -89,13 +97,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "red",
     borderRadius: 6,
-    marginTop: 30
+    marginTop: 30,
   },
-  buttonText:{
+  buttonText: {
     color: "white",
     fontSize: 17,
-    fontWeight: 600
-  }
+    fontWeight: 600,
+  },
 });
 
 export default Index;

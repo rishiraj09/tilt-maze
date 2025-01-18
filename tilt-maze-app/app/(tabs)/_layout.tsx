@@ -1,9 +1,11 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import {View, Text} from "react-native";
 import { Tabs } from "expo-router";
 
+
 // context
 import { GameContext } from "@/contexts/GameContext";
+
 
 // icons
 import Icon from "react-native-vector-icons/AntDesign";
@@ -44,14 +46,17 @@ const TabIcon = ({ icontype, icon, color, name, focused }: IconData) => {
 };
 
 const TabsLayout = () => {
-  const {isStarted} = useContext(GameContext)
+ 
+  const {isStarted} = useContext(GameContext);
+  
+ 
   return (
     <>
       {/* <StatusBar style="light"/> */}
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
-          tabBarActiveTintColor: "#20eefb",
+          tabBarActiveTintColor: "white",
           tabBarInactiveTintColor: "#CDCDE0",
           tabBarStyle: {
             backgroundColor: "#161622",
