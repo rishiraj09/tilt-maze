@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,10 +10,8 @@ import {
   TextInput,
 } from "react-native";
 import { router } from "expo-router";
-import {z, ZodType} from "zod";
+import { z, ZodType } from "zod";
 import Toast from "react-native-toast-message";
-
-
 
 // context
 import { AuthContext } from "@/contexts/AuthContext";
@@ -26,80 +24,64 @@ interface Formdata {
   password: string;
 }
 
-interface ErrorParams {
-  path: string;
-  message: string;
-}
-
 const SignIn = () => {
-  const {handleSignin} = useContext(AuthContext)
+  const { handleSignin } = useContext(AuthContext);
   const [formdata, setFormdata] = useState<Formdata>({
     email: "",
     password: "",
   });
-  const [errorParams, setErrorParams] = useState<ErrorParams[]>([]);
+  const [errorParams, setErrorParams] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const signinSchema:ZodType<Formdata> = z.object({
+  const signinSchema: ZodType<Formdata> = z.object({
     email: z.string().email(),
-    password: z.string()
+    password: z.string().min(1),
   });
 
-  useEffect(()=>{
-    if(errorParams.length >0){
-      errorToast("Invalid Credential", "Enter valid credential!")
-    }
-  },[errorParams])
-
-  const errorToast = (title:string, message: string) => {
+  const errorToast = (title: string, message: string) => {
     Toast.show({
-      type: 'error', // or 'error'
+      type: "error", // or 'error'
       text1: title,
       text2: message,
     });
   };
 
-  const handleFormValidation = () =>{
-    let errlist:ErrorParams[] = [];
+  const handleFormValidation = () => {
+    let errlist: string[] = [];
     const validation = signinSchema.safeParse(formdata);
-    if(!validation.success){
-      const {errors} = validation.error;
-      errors.forEach(err =>{
-        errlist.push({
-          path: err.path[0] as string,
-          message: err.message
-        })
-      })
+    if (!validation.success) {
+      const { errors } = validation.error;
+      errors.forEach((err) => {
+        errlist.push(err.path[0] as string);
+      });
     }
-    setErrorParams(errlist);
-    if(errlist.length >0){
+    setErrorParams(errlist)
+    if (errlist.length > 0) {
       return false;
-    }else{
+    } else {
       return true;
     }
-  }
+  };
 
-  const handleFormSubmit = async()=>{
+  const handleFormSubmit = async () => {
     try {
       setLoading(true);
       const validation = handleFormValidation();
-        if(!validation){
-            return false;
-        }
-        const res = await  handleSignin(formdata);
-        if(res.success === true){
-          router.replace("/home");
-        }else{
-          errorToast(res.error, res.message)
-        }
+      if (!validation) {
+        return false;
+      }
+      const res = await handleSignin(formdata);
+      if (res.success === true) {
+        router.replace("/home");
+      } else {
+        errorToast(res.error, res.message);
+      }
     } catch (error) {
       console.log("Error signing in user");
-    }finally{
+    } finally {
       setLoading(false);
     }
-  }
-
- 
+  };
 
   return (
     <SafeAreaView
@@ -120,25 +102,31 @@ const SignIn = () => {
           alignItems: "center",
         }}
       >
-        <Toast config={toastConfig}/>
+        <Toast config={toastConfig} />
         <View style={styles.form}>
           <Text style={styles.header}>Sign In</Text>
           <TextInput
             placeholder="Email"
             placeholderTextColor="#7b7b8b"
-            style={styles.textInput}
+            keyboardType="email-address"
+            style={[styles.textInput, errorParams.includes("email") ? styles.error : ""]}
             value={formdata.email}
             onChangeText={(e) => {
               setFormdata({
                 ...formdata,
                 email: e,
               });
+              setErrorParams(
+                errorParams.filter((err: string) => {
+                  return err !== "email";
+                })
+              );
             }}
           />
           <TextInput
             placeholder="Password"
             placeholderTextColor="#7b7b8b"
-            style={styles.textInput}
+            style={[styles.textInput, errorParams.includes("password") ? styles.error : ""]}
             secureTextEntry={true}
             value={formdata.password}
             onChangeText={(e) => {
@@ -146,22 +134,27 @@ const SignIn = () => {
                 ...formdata,
                 password: e,
               });
+              setErrorParams(
+                errorParams.filter((err: string) => {
+                  return err !== "password";
+                })
+              );
             }}
           />
-          <TouchableOpacity style={styles.button}
-          onPress={handleFormSubmit}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
             <Text style={styles.buttonText}>
-             {loading ? "Signing in ..": "Sign In"}
+              {loading ? "Signing in .." : "Sign In"}
             </Text>
           </TouchableOpacity>
 
           {/* link holder */}
           <View style={styles.linkholder}>
             <Text>Don't have an account?</Text>
-            <TouchableOpacity onPress={() => {
-                        router.replace("/sign-up");
-                      }}>
+            <TouchableOpacity
+              onPress={() => {
+                router.replace("/sign-up");
+              }}
+            >
               <Text style={styles.link}>Sign up</Text>
             </TouchableOpacity>
           </View>
@@ -225,6 +218,9 @@ const styles = StyleSheet.create({
   },
   link: {
     color: "red",
+  },
+  error: {
+    borderColor: "red",
   },
 });
 

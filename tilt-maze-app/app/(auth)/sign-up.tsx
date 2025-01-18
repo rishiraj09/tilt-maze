@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -30,16 +30,13 @@ interface ErrorParams {
 }
 
 const SignUp = () => {
+  const { handleSignup } = useContext(AuthContext);
   const [formdata, setFormdata] = useState<Formdata>({
     name: "",
     email: "",
     password: "",
   });
-  const [errorParams, setErrorParams] = useState<any>({
-    name: false,
-    email: false,
-    password: false
-  });
+  const [errorParams, setErrorParams] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const signupSchema: ZodType<Formdata> = z.object({
@@ -47,6 +44,52 @@ const SignUp = () => {
     email: z.string().email(),
     password: z.string().min(5),
   });
+
+
+  const errorToast = (title: string, message: string) => {
+    Toast.show({
+      type: "error", // or 'error'
+      text1: title,
+      text2: message,
+    });
+  };
+
+  const handleFormValidation = () => {
+    let errlist: string[] = [];
+    const validation = signupSchema.safeParse(formdata);
+    if (!validation.success) {
+      const { errors } = validation.error;
+      errors.forEach((err) => {
+        errlist.push(err.path[0] as string);
+      });
+    }
+    setErrorParams(errlist);
+    if (errlist.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handleFormSubmit = async () => {
+    try {
+      setLoading(true);
+      const validation = handleFormValidation();
+      if (!validation) {
+        return false;
+      }
+      const res = await handleSignup(formdata);
+      if (res.success === true) {
+        router.replace("/sign-in");
+      } else {
+        errorToast(res.error, res.message);
+      }
+    } catch (error) {
+      console.log("Error signing up user");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -72,31 +115,45 @@ const SignUp = () => {
           <TextInput
             placeholder="Name"
             placeholderTextColor="#7b7b8b"
-            style={[styles.textInput, styles.error]}
+            style={[
+              styles.textInput,
+              errorParams.includes("name") ? styles.error : "",
+            ]}
             value={formdata.name}
             onChangeText={(e) => {
               setFormdata({
                 ...formdata,
                 name: e,
               });
+              setErrorParams(
+                errorParams.filter((err: string) => {
+                  return err !== "name";
+                })
+              );
             }}
           />
           <TextInput
             placeholder="Email"
             placeholderTextColor="#7b7b8b"
-            style={styles.textInput}
+            style={[styles.textInput, errorParams.includes("email") ? styles.error : ""]}
             value={formdata.email}
+            keyboardType="email-address"
             onChangeText={(e) => {
               setFormdata({
                 ...formdata,
                 email: e,
               });
+              setErrorParams(
+                errorParams.filter((err: string) => {
+                  return err !== "email";
+                })
+              );
             }}
           />
           <TextInput
             placeholder="Password (min 5 characters)"
             placeholderTextColor="#7b7b8b"
-            style={styles.textInput}
+            style={[styles.textInput, errorParams.includes("password") ? styles.error : ""]}
             secureTextEntry={true}
             value={formdata.password}
             onChangeText={(e) => {
@@ -104,10 +161,17 @@ const SignUp = () => {
                 ...formdata,
                 password: e,
               });
+              setErrorParams(
+                errorParams.filter((err: string) => {
+                  return err !== "password";
+                })
+              );
             }}
           />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+          <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
+            <Text style={styles.buttonText}>
+              {loading ? "Signing up..." : "Sign Up"}
+            </Text>
           </TouchableOpacity>
           <View style={styles.linkholder}>
             <Text>Already have an account?</Text>
@@ -180,9 +244,9 @@ const styles = StyleSheet.create({
   link: {
     color: "red",
   },
-  error:{
-    borderColor: "red"
-  }
+  error: {
+    borderColor: "red",
+  },
 });
 
 export default SignUp;

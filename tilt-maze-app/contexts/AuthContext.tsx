@@ -14,11 +14,13 @@ interface UserData {
 interface AuthContext {
   user: UserData | null;
   handleSignin: any;
+  handleSignup:any;
 }
 
 export const AuthContext = createContext<AuthContext>({
   user: null,
   handleSignin: () => {},
+  handleSignup: () => {}
 });
 
 type AuthContextProviderProps = {
@@ -74,12 +76,41 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     email: string;
     password: string;
   }) =>{
-
+    try {
+      const res = await api.post("/auth/signup", formdata);
+      if(res.status === 200 && res.data.success === true){
+        return {
+          success:true,
+          message: "Account created successfully"
+        }
+      }
+    } catch (error:any) {
+      if (error.status === 400 || error.status === 401) {
+        return {
+            success:false,
+            error: "Invalid Credential",
+            message: "Enter valid credential!"
+        }
+      } else if (error.status === 402) {
+        return {
+            success:false,
+            error: "Account Exists",
+            message: "Account already exists!"
+        }
+      } else if (error.status === 500) {
+        return {
+            success:false,
+            error: "Internal Error",
+            message: "Something went wrong"
+        }
+      }
+    }
   }
 
   const contextData = {
     user,
     handleSignin,
+    handleSignup
   };
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

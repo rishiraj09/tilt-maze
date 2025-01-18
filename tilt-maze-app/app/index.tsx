@@ -1,12 +1,20 @@
-import React from "react";
+import React, {useContext, useEffect} from "react";
 import { SafeAreaView, StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
+
+// context
+import { AuthContext } from "@/contexts/AuthContext";
+
 
 // images
 import {images} from "../constants/images";
 
 const Index = () => {
+  const {user} = useContext(AuthContext);
+  useEffect(() =>{
+    console.log(user)
+  },[user])
   return (
     <SafeAreaView
       style={{

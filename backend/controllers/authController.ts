@@ -14,7 +14,7 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({
+      return res.status(400).json({
         success: false,
         errors: errors.array({ onlyFirstError: true }),
       });
@@ -22,7 +22,7 @@ export const signup = async (req: Request, res: Response) => {
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      return res.status(422).json({
+      return res.status(402).json({
         success: false,
         error: "email-exist",
         message: "Email already exists!",
