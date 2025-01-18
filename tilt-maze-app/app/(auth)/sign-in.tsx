@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,15 +10,97 @@ import {
   TextInput,
 } from "react-native";
 import { router } from "expo-router";
+import {z, ZodType} from "zod";
+import Toast from "react-native-toast-message";
+
+
+
+// context
+import { AuthContext } from "@/contexts/AuthContext";
+
+// component
+import { toastConfig } from "@/components/ToastConfig";
+
+interface Formdata {
+  email: string;
+  password: string;
+}
+
+interface ErrorParams {
+  path: string;
+  message: string;
+}
 
 const SignIn = () => {
-  const [formdata, setFormdata] = useState<{
-    email: string;
-    password: string;
-  }>({
+  const {handleSignin} = useContext(AuthContext)
+  const [formdata, setFormdata] = useState<Formdata>({
     email: "",
     password: "",
   });
+  const [errorParams, setErrorParams] = useState<ErrorParams[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const signinSchema:ZodType<Formdata> = z.object({
+    email: z.string().email(),
+    password: z.string()
+  });
+
+  useEffect(()=>{
+    if(errorParams.length >0){
+      errorToast("Invalid Credential", "Enter valid credential!")
+    }
+  },[errorParams])
+
+  const errorToast = (title:string, message: string) => {
+    Toast.show({
+      type: 'error', // or 'error'
+      text1: title,
+      text2: message,
+    });
+  };
+
+  const handleFormValidation = () =>{
+    let errlist:ErrorParams[] = [];
+    const validation = signinSchema.safeParse(formdata);
+    if(!validation.success){
+      const {errors} = validation.error;
+      errors.forEach(err =>{
+        errlist.push({
+          path: err.path[0] as string,
+          message: err.message
+        })
+      })
+    }
+    setErrorParams(errlist);
+    if(errlist.length >0){
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+  const handleFormSubmit = async()=>{
+    try {
+      setLoading(true);
+      const validation = handleFormValidation();
+        if(!validation){
+            return false;
+        }
+        const res = await  handleSignin(formdata);
+        if(res.success === true){
+          router.replace("/home");
+        }else{
+          errorToast(res.error, res.message)
+        }
+    } catch (error) {
+      console.log("Error signing in user");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+ 
+
   return (
     <SafeAreaView
       style={{
@@ -38,6 +120,7 @@ const SignIn = () => {
           alignItems: "center",
         }}
       >
+        <Toast config={toastConfig}/>
         <View style={styles.form}>
           <Text style={styles.header}>Sign In</Text>
           <TextInput
@@ -65,9 +148,15 @@ const SignIn = () => {
               });
             }}
           />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Sign In</Text>
+          <TouchableOpacity style={styles.button}
+          onPress={handleFormSubmit}
+          >
+            <Text style={styles.buttonText}>
+             {loading ? "Signing in ..": "Sign In"}
+            </Text>
           </TouchableOpacity>
+
+          {/* link holder */}
           <View style={styles.linkholder}>
             <Text>Don't have an account?</Text>
             <TouchableOpacity onPress={() => {

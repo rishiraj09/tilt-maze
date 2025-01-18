@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { GameContextProvider } from "@/contexts/GameContext";
+import { AuthContextProvider } from "@/contexts/AuthContext";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -43,12 +44,14 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <GameContextProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </GameContextProvider>
+    <AuthContextProvider>
+      <GameContextProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </GameContextProvider>
+    </AuthContextProvider>
   );
 }

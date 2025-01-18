@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useState, useEffect } from "react";
-import axios from "axios";
 
 interface GameContext {
   gameId: string;
@@ -15,7 +14,6 @@ interface GameContext {
   setGameModal: any;
 }
 
-const API_URL = "/api/v1";
 
 export const GameContext = createContext<GameContext>({
   gameId: "",

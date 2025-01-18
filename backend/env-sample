@@ -1,3 +1,4 @@
+NODE_ENV= environment (eg production or development)
 PORT= port to run the server
 DB_URL= mongodb connection string 
 JWT_SECRET= jwt setcret token

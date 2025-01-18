@@ -10,17 +10,44 @@ import {
   TextInput,
 } from "react-native";
 import { router } from "expo-router";
+import { z, ZodType } from "zod";
+import Toast from "react-native-toast-message";
+
+// context
+import { AuthContext } from "@/contexts/AuthContext";
+
+// component
+import { toastConfig } from "@/components/ToastConfig";
+
+interface Formdata {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface ErrorParams {
+  path: string;
+}
 
 const SignUp = () => {
-  const [formdata, setFormdata] = useState<{
-    name: string;
-    email: string;
-    password: string;
-  }>({
+  const [formdata, setFormdata] = useState<Formdata>({
     name: "",
     email: "",
     password: "",
   });
+  const [errorParams, setErrorParams] = useState<any>({
+    name: false,
+    email: false,
+    password: false
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const signupSchema: ZodType<Formdata> = z.object({
+    name: z.string().min(2).max(300),
+    email: z.string().email(),
+    password: z.string().min(5),
+  });
+
   return (
     <SafeAreaView
       style={{
@@ -45,7 +72,7 @@ const SignUp = () => {
           <TextInput
             placeholder="Name"
             placeholderTextColor="#7b7b8b"
-            style={styles.textInput}
+            style={[styles.textInput, styles.error]}
             value={formdata.name}
             onChangeText={(e) => {
               setFormdata({
@@ -67,7 +94,7 @@ const SignUp = () => {
             }}
           />
           <TextInput
-            placeholder="Password"
+            placeholder="Password (min 5 characters)"
             placeholderTextColor="#7b7b8b"
             style={styles.textInput}
             secureTextEntry={true}
@@ -84,9 +111,11 @@ const SignUp = () => {
           </TouchableOpacity>
           <View style={styles.linkholder}>
             <Text>Already have an account?</Text>
-            <TouchableOpacity onPress={() => {
-                        router.replace("/sign-in");
-                      }}>
+            <TouchableOpacity
+              onPress={() => {
+                router.replace("/sign-in");
+              }}
+            >
               <Text style={styles.link}>Sign in</Text>
             </TouchableOpacity>
           </View>
@@ -151,6 +180,9 @@ const styles = StyleSheet.create({
   link: {
     color: "red",
   },
+  error:{
+    borderColor: "red"
+  }
 });
 
 export default SignUp;
