@@ -16,8 +16,8 @@ router
       .withMessage("Name should be minimum of 2 characters"),
     body("email").isEmail().withMessage("Enter valid email"),
     body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password should be minimum of 6 characters"),
+      .isLength({ min: 5 })
+      .withMessage("Password should be minimum of 5 characters"),
   ], signup);
 
 router.route("/signin")
