@@ -56,7 +56,16 @@ const Profile = () => {
         },
       });
       if (res.status === 200 && res.data.success === true) {
-        setGamelist(res.data.gamelist);
+        let gamelog:any[] = [];
+        if(res.data.gamelist.length > 0){
+          res.data.gamelist.forEach((gm:RankedList)=>{
+            gamelog.push({
+              ...gm,
+              user: user?.name
+            })
+          })
+        }
+        setGamelist(gamelog);
       }
     } catch (error) {
       console.log("Error fetching game log");

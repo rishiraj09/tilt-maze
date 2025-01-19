@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { Accelerometer } from "expo-sensors";
 import Maze from "./Maze";
 
@@ -48,6 +54,28 @@ const GameComponent = () => {
   );
   const [hasReachedGoal, setHasReachedGoal] = useState<boolean>(false);
 
+  const [sensitivity, setSensitivity] = useState(Platform.OS === 'ios' ? 2 : 8);
+
+  // Add this new state to track if initial position has been set
+  const [isInitialPositionSet, setIsInitialPositionSet] = useState(false);
+  // Modify the useEffect to set initial position when dimensions are available
+  useEffect(() => {
+    if (
+      containerDimensions.width > 0 &&
+      containerDimensions.height > 0 &&
+      !isInitialPositionSet
+    ) {
+      const mazeSize = containerDimensions.width;
+      const verticalOffset = (containerDimensions.height - mazeSize) / 2;
+
+      setPosition({
+        x: ballRadius * 2, // Give some padding from the left wall
+        y: verticalOffset + ballRadius * 2, // Position relative to maze top
+      });
+
+      setIsInitialPositionSet(true);
+    }
+  }, [containerDimensions, isInitialPositionSet]);
 
   useEffect(() => {
     if (containerDimensions.width === 0 || containerDimensions.height === 0)
@@ -138,15 +166,29 @@ const GameComponent = () => {
     setWalls(mazeWalls);
   }, [containerDimensions]);
 
+  // ******* Accelerometer operation **********
   useEffect(() => {
-    const sensitivity = 2;
+
     const threshold = 0.1;
 
     const subscription = Accelerometer.addListener((data) => {
       const { x, y } = data;
+
+      // Platform-specific calculations
+      const adjustedX = Platform.OS === "ios" ? x : -x;
+      const adjustedY = Platform.OS === "ios" ? y : -y;
+
+      const smoothingFactor = 0.3;
+
       setVelocity((prev) => ({
-        vx: Math.abs(x) > threshold ? prev.vx + x * sensitivity : prev.vx,
-        vy: Math.abs(y) > threshold ? prev.vy - y * sensitivity : prev.vy,
+        vx:
+          Math.abs(x) > threshold
+            ? prev.vx + adjustedX * sensitivity * (1 - smoothingFactor)
+            : prev.vx,
+        vy:
+          Math.abs(y) > threshold
+            ? prev.vy - adjustedY * sensitivity * (1 - smoothingFactor)
+            : prev.vy,
       }));
     });
 
@@ -223,8 +265,8 @@ const GameComponent = () => {
   useEffect(() => {
     setGame({
       ...game,
-      collision: collideCount
-    })
+      collision: collideCount,
+    });
   }, [collideCount]);
 
   useEffect(() => {
@@ -253,16 +295,13 @@ const GameComponent = () => {
         position.x <= goalCellX + cellSize &&
         position.y >= goalCellY &&
         position.y <= goalCellY + cellSize
-      ){
+      ) {
         setHasReachedGoal(true);
         stopTimer();
         endGame(formatTime(timer), timer);
       }
-
     }
   }, [position, containerDimensions, hasReachedGoal, timer]);
-
-  
 
   const detectCollision = (
     x: number,
@@ -352,11 +391,8 @@ const GameComponent = () => {
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
         setContainerDimensions({ width, height });
-        setPosition({
-          x: ballRadius + 15,
-          y: (containerDimensions.height - containerDimensions.width) / 2,
-        });
       }}
+  
     >
       <TouchableOpacity
         style={styles.exitBtn}
