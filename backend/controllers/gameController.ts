@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import dotenv from "dotenv";
+import moment = require("moment");
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ export const getGameFeed = async (req: Request, res: Response) => {
       timer: string;
       time_in_second: number;
       collision: number;
+      createdAt: string;
     }[] = [];
     const games = await Game.find({
       status: "completed",
@@ -39,6 +41,7 @@ export const getGameFeed = async (req: Request, res: Response) => {
           timer: gm.timer,
           time_in_second: gm.time_in_second,
           collision: gm.collision,
+          createdAt: moment(gm.updatedAt).format("lll"),
         });
       });
       let users = await User.find().where("_id").in(uids);
@@ -50,6 +53,7 @@ export const getGameFeed = async (req: Request, res: Response) => {
           timer: string;
           time_in_second: number;
           collision: number;
+          createdAt: string;
         }) => {
           let userIndex = users.findIndex(
             (usr: any) => usr._id.toString().trim() === gm.user_id.trim()
@@ -66,9 +70,9 @@ export const getGameFeed = async (req: Request, res: Response) => {
       );
     }
     return res.status(200).json({
-        success:true,
-        rankedlist
-    })
+      success: true,
+      rankedlist,
+    });
   } catch (error) {
     console.error("Could not fetch game feed", error);
     return res.status(500).json({
@@ -77,7 +81,6 @@ export const getGameFeed = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const createNewGame = async (req: Request, res: Response) => {
   const { userid } = req.body;
@@ -158,4 +161,37 @@ export const exitGame = async (req: Request, res: Response) => {
   }
 };
 
-
+export const getUserGameLog = async (req: Request, res: Response) => {
+  const { uid } = req.params;
+  try {
+    const games = await Game.find({ user_id: uid })
+      .sort({
+        _id: -1,
+      })
+      .limit(80);
+    let gamelist: any[] = [];
+    if (games.length > 0) {
+      games.forEach((gm: any) => {
+        gamelist.push({
+          id: gm._id.toString().trim(),
+          user_id: gm.user_id,
+          user: "",
+          timer: gm.timer,
+          time_in_second: gm.time_in_second,
+          collision: gm.collision,
+          createdAt: moment(gm.updatedAt).format("lll"),
+        });
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      gamelist,
+    });
+  } catch (error) {
+    console.error("Could not fetch game log", error);
+    return res.status(500).json({
+      success: false,
+      message: "Could not fetch game log",
+    });
+  }
+};

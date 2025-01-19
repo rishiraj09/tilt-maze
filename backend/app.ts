@@ -50,8 +50,8 @@ app.use("/api/v1/game", game);
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001; // Explicitly parse the port to a number
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port: ${PORT}`);
   connectToDatabase()
 });
   
