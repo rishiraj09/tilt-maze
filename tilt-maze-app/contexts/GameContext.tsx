@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState, useEffect } from "react";
+import { createContext, ReactNode, useState} from "react";
 import * as SecureStore from "expo-secure-store";
 // api util
 import api from "@/config/api";
@@ -11,7 +11,7 @@ interface GameData{
   status: string;
   timer: string | null;
   time_in_second: number | null;
-  collision: number
+  collision: number;
 }
 interface GameContext {
   game: GameData;
@@ -198,9 +198,6 @@ export const GameContextProvider = ({ children }: GameContextProviderProps) => {
     }
   }
 
-  useEffect(()=>{
-    console.log(rankedlist)
-  },[rankedlist])
 
 
   const contextData = {

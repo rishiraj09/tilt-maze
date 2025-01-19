@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import { StyleSheet, View, Text, SafeAreaView, FlatList, RefreshControl } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -8,7 +8,7 @@ import { GameContext } from "@/contexts/GameContext";
 
 // components
 import RankListItem from "@/components/RankListItem";
-
+import EmptyState from "@/components/EmptyState";
 
 const Home = () => {
   const { setIsStarted, fetchRankFeed, rankedlist, loading } = useContext(GameContext);
@@ -45,6 +45,9 @@ const Home = () => {
           <View style={styles.header}>
             <Text style={styles.headerText}>LEADER BOARD</Text>
           </View>
+        )}
+        ListEmptyComponent={()=>(
+          <EmptyState/>
         )}
 
         refreshControl={<RefreshControl

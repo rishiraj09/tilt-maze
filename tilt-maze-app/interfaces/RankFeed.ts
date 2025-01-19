@@ -5,4 +5,5 @@ export interface RankedList {
   timer: string;
   time_in_second: number;
   collision: number;
+  createdAt: string;
 }

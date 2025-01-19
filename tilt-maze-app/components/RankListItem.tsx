@@ -11,6 +11,7 @@ interface RankListData {
     timer: string;
     time_in_second: number;
     collision: number;
+    createdAt: string;
   };
   index: number;
 }
@@ -26,6 +27,7 @@ const RankListItem = ({ item, index }: RankListData) => {
       </View>
       <View style={styles.info}>
         <Text style={styles.name}>{item.user}</Text>
+        <Text style={styles.timestamp}>{item.createdAt}</Text>
       </View>
       <View style={styles.badgeHolder}>
         <View style={styles.badge}>
@@ -90,6 +92,7 @@ const styles = StyleSheet.create({
     flex: 1,
     display: "flex",
     alignItems: "flex-start",
+    gap: 3
   },
   name: {
     fontSize: 15,
@@ -97,6 +100,10 @@ const styles = StyleSheet.create({
     color: "white",
     overflow: "hidden",
     textOverflow: "ellipsis",
+  },
+  timestamp:{
+    fontSize: 10,
+    color: "grey"
   },
   badgeHolder: {
     width: 80,
