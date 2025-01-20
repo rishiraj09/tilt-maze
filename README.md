@@ -21,6 +21,11 @@ The Tilt Maze Game is a React Native mobile application where players navigate a
 
 ![Image](https://github.com/user-attachments/assets/b1046910-be59-4eee-ac8c-a79f10645e69)
 
+
+### Demo
+[![Watch the video](https://img.youtube.com/vi/Uw5jdPm67Xw/0.jpg)](https://www.youtube.com/watch?v=Uw5jdPm67Xw)
+
+
 # Tilt Maze Game Documentation
 
 ## Game Components
